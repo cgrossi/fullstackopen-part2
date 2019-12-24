@@ -33,21 +33,20 @@ const App = () => {
       }
     }) 
     if(!duplicate) {
-      if(newNumber) {
-        const persObj = {
-          name: newName,
-          number: newNumber
-        }
-        setPersons(persons.concat(persObj))
-      } else {
-        const persObj = {
-          name: newName
-        }
-        setPersons(persons.concat(persObj))
+      const persObj = {
+        name: newName,
+        number: newNumber
       }
+
+      axios
+        .post('http://localhost:3001/persons', persObj)
+        .then(response => {
+          setPersons(persons.concat(response.data))
+          setNewName('')
+          setNewNumber('')
+        })
     }
-    setNewName('')
-    setNewNumber('')
+
   }
 
   const handleNameChange = (e) => {
