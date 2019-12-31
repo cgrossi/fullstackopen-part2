@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Filter from './Filter'
 import PersonForm from './PersonForm'
 import Persons from './Persons'
+import Notification from './Notification'
 import noteService from '../services/notes'
 
 const App = () => {
@@ -10,6 +11,8 @@ const App = () => {
   const [ newNumber, setNewNumber ] = useState('')
   const [search, setSearch] = useState('')
   const [showAll, setShowAll] = useState(true)
+  const [message, setMessage] = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     noteService
@@ -35,6 +38,10 @@ const numbers = () => namesToShow.map(person => <div key={person.name}>{person.n
           noteService
             .updateContact(person.id, newContact)
             .then(response => {
+              setMessage(`Updated ${response.data.name} successfully`)
+              setTimeout(() => {
+                setMessage(null)
+              },3500)
               setPersons(persons.map(contact => {
                 if(contact.name === newName) {
                   return response.data
@@ -42,6 +49,15 @@ const numbers = () => namesToShow.map(person => <div key={person.name}>{person.n
                   return contact
                 }
               }))
+              setNewName('')
+              setNewNumber('')
+            })
+            .catch(() => {
+              setError(`${newContact.name} has already been removed from the server`)
+              setTimeout(() => {
+                setError(null)
+              },3500)
+              setPersons(persons.filter(person => person.name !== newContact.name))
               setNewName('')
               setNewNumber('')
             })
@@ -58,6 +74,10 @@ const numbers = () => namesToShow.map(person => <div key={person.name}>{person.n
         .addContact(persObj)
         .then(response => {
           setPersons(persons.concat(response.data))
+          setMessage(`Added ${response.data.name} successfully`)
+          setTimeout(() => {
+            setMessage(null)
+          },3500)
           setNewName('')
           setNewNumber('')
         })
@@ -95,6 +115,7 @@ const numbers = () => namesToShow.map(person => <div key={person.name}>{person.n
       <h2>Phonebook</h2>
       <Filter search={search} handleSearch={handleSearch} />
       <h3>Add New Person</h3>
+      <Notification message={message} error={error}/>
       <PersonForm handleSubmit={handleSubmit} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange} />
       <h3>Numbers</h3>
       <Persons numbers={numbers} />
